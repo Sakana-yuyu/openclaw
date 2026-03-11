@@ -1,4 +1,5 @@
 import { html, nothing } from "lit";
+import { t } from "../../i18n/index.ts";
 import { normalizeToolName } from "../../../../src/agents/tool-policy-shared.js";
 import type { SkillStatusEntry, SkillStatusReport, ToolsCatalogResult } from "../types.ts";
 import {
@@ -36,10 +37,10 @@ export function renderAgentTools(params: {
   const globalTools = config.globalTools ?? {};
   const profile = agentTools.profile ?? globalTools.profile ?? "full";
   const profileSource = agentTools.profile
-    ? "agent override"
+    ? t("agentPanelsPage.tools.profileSource.agentOverride")
     : globalTools.profile
-      ? "global default"
-      : "default";
+      ? t("agentPanelsPage.tools.profileSource.globalDefault")
+      : t("agentPanelsPage.tools.profileSource.default");
   const hasAgentAllow = Array.isArray(agentTools.allow) && agentTools.allow.length > 0;
   const hasGlobalAllow = Array.isArray(globalTools.allow) && globalTools.allow.length > 0;
   const editable =
@@ -126,28 +127,28 @@ export function renderAgentTools(params: {
     <section class="card">
       <div class="row" style="justify-content: space-between;">
         <div>
-          <div class="card-title">Tool Access</div>
+          <div class="card-title">${t("agentPanelsPage.tools.title")}</div>
           <div class="card-sub">
-            Profile + per-tool overrides for this agent.
-            <span class="mono">${enabledCount}/${toolIds.length}</span> enabled.
+            ${t("agentPanelsPage.tools.subtitle")}
+            <span class="mono">${enabledCount}/${toolIds.length}</span> ${t("common.enabled")}.
           </div>
         </div>
         <div class="row" style="gap: 8px;">
           <button class="btn btn--sm" ?disabled=${!editable} @click=${() => updateAll(true)}>
-            Enable All
+            ${t("agentPanelsPage.tools.enableAll")}
           </button>
           <button class="btn btn--sm" ?disabled=${!editable} @click=${() => updateAll(false)}>
-            Disable All
+            ${t("agentPanelsPage.tools.disableAll")}
           </button>
           <button class="btn btn--sm" ?disabled=${params.configLoading} @click=${params.onConfigReload}>
-            Reload Config
+            ${t("agentsPage.common.reloadConfig")}
           </button>
           <button
             class="btn btn--sm primary"
             ?disabled=${params.configSaving || !params.configDirty}
             @click=${params.onConfigSave}
           >
-            ${params.configSaving ? "Saving…" : "Save"}
+            ${params.configSaving ? t("agentsPage.common.saving") : t("agentsPage.common.save")}
           </button>
         </div>
       </div>
@@ -156,7 +157,7 @@ export function renderAgentTools(params: {
         params.toolsCatalogError
           ? html`
               <div class="callout warn" style="margin-top: 12px">
-                Could not load runtime tool catalog. Showing fallback list.
+                ${t("agentPanelsPage.tools.catalogFallbackWarn")}
               </div>
             `
           : nothing
@@ -165,7 +166,7 @@ export function renderAgentTools(params: {
         !params.configForm
           ? html`
               <div class="callout info" style="margin-top: 12px">
-                Load the gateway config to adjust tool profiles.
+                ${t("agentPanelsPage.tools.loadConfigHint")}
               </div>
             `
           : nothing
@@ -174,7 +175,7 @@ export function renderAgentTools(params: {
         hasAgentAllow
           ? html`
               <div class="callout info" style="margin-top: 12px">
-                This agent is using an explicit allowlist in config. Tool overrides are managed in the Config tab.
+                ${t("agentPanelsPage.tools.agentAllowlistHint")}
               </div>
             `
           : nothing
@@ -183,7 +184,7 @@ export function renderAgentTools(params: {
         hasGlobalAllow
           ? html`
               <div class="callout info" style="margin-top: 12px">
-                Global tools.allow is set. Agent overrides cannot enable tools that are globally blocked.
+                ${t("agentPanelsPage.tools.globalAllowHint")}
               </div>
             `
           : nothing
@@ -191,19 +192,19 @@ export function renderAgentTools(params: {
 
       <div class="agent-tools-meta" style="margin-top: 16px;">
         <div class="agent-kv">
-          <div class="label">Profile</div>
+          <div class="label">${t("agentPanelsPage.tools.profileLabel")}</div>
           <div class="mono">${profile}</div>
         </div>
         <div class="agent-kv">
-          <div class="label">Source</div>
+          <div class="label">${t("agentPanelsPage.tools.sourceLabel")}</div>
           <div>${profileSource}</div>
         </div>
         ${
           params.configDirty
             ? html`
                 <div class="agent-kv">
-                  <div class="label">Status</div>
-                  <div class="mono">unsaved</div>
+                  <div class="label">${t("agentPanelsPage.tools.statusLabel")}</div>
+                  <div class="mono">${t("agentPanelsPage.tools.unsaved")}</div>
                 </div>
               `
             : nothing
@@ -211,7 +212,7 @@ export function renderAgentTools(params: {
       </div>
 
       <div class="agent-tools-presets" style="margin-top: 16px;">
-        <div class="label">Quick Presets</div>
+        <div class="label">${t("agentPanelsPage.tools.quickPresets")}</div>
         <div class="agent-tools-buttons">
           ${profileOptions.map(
             (option) => html`
@@ -229,7 +230,7 @@ export function renderAgentTools(params: {
             ?disabled=${!editable}
             @click=${() => params.onProfileChange(params.agentId, null, false)}
           >
-            Inherit
+            ${t("agentPanelsPage.tools.inherit")}
           </button>
         </div>
       </div>
@@ -244,7 +245,7 @@ export function renderAgentTools(params: {
                   ${
                     "source" in section && section.source === "plugin"
                       ? html`
-                          <span class="mono" style="margin-left: 6px">plugin</span>
+                          <span class="mono" style="margin-left: 6px">${t("agentPanelsPage.tools.pluginTag")}</span>
                         `
                       : nothing
                   }
@@ -260,9 +261,9 @@ export function renderAgentTools(params: {
                     const source =
                       catalogTool.source === "plugin"
                         ? catalogTool.pluginId
-                          ? `plugin:${catalogTool.pluginId}`
-                          : "plugin"
-                        : "core";
+                          ? t("agentPanelsPage.tools.pluginWithId", { id: catalogTool.pluginId })
+                          : t("agentPanelsPage.tools.pluginTag")
+                        : t("agentPanelsPage.tools.coreTag");
                     const isOptional = catalogTool.optional === true;
                     return html`
                       <div class="agent-tool-row">
@@ -273,7 +274,7 @@ export function renderAgentTools(params: {
                             ${
                               isOptional
                                 ? html`
-                                    <span class="mono" style="margin-left: 6px; opacity: 0.8">optional</span>
+                                    <span class="mono" style="margin-left: 6px; opacity: 0.8">${t("agentPanelsPage.tools.optionalTag")}</span>
                                   `
                                 : nothing
                             }
@@ -301,7 +302,7 @@ export function renderAgentTools(params: {
       ${
         params.toolsCatalogLoading
           ? html`
-              <div class="card-sub" style="margin-top: 10px">Refreshing tool catalog…</div>
+              <div class="card-sub" style="margin-top: 10px">${t("agentPanelsPage.tools.refreshingCatalog")}</div>
             `
           : nothing
       }
@@ -351,9 +352,9 @@ export function renderAgentSkills(params: {
     <section class="card">
       <div class="row" style="justify-content: space-between;">
         <div>
-          <div class="card-title">Skills</div>
+          <div class="card-title">${t("tabs.skills")}</div>
           <div class="card-sub">
-            Per-agent skill allowlist and workspace skills.
+            ${t("agentPanelsPage.skills.subtitle")}
             ${
               totalCount > 0
                 ? html`<span class="mono">${enabledCount}/${totalCount}</span>`
@@ -363,27 +364,27 @@ export function renderAgentSkills(params: {
         </div>
         <div class="row" style="gap: 8px;">
           <button class="btn btn--sm" ?disabled=${!editable} @click=${() => params.onClear(params.agentId)}>
-            Use All
+            ${t("agentPanelsPage.skills.useAll")}
           </button>
           <button
             class="btn btn--sm"
             ?disabled=${!editable}
             @click=${() => params.onDisableAll(params.agentId)}
           >
-            Disable All
+            ${t("agentPanelsPage.tools.disableAll")}
           </button>
           <button class="btn btn--sm" ?disabled=${params.configLoading} @click=${params.onConfigReload}>
-            Reload Config
+            ${t("agentsPage.common.reloadConfig")}
           </button>
           <button class="btn btn--sm" ?disabled=${params.loading} @click=${params.onRefresh}>
-            ${params.loading ? "Loading…" : "Refresh"}
+            ${params.loading ? t("agentsPage.common.loading") : t("common.refresh")}
           </button>
           <button
             class="btn btn--sm primary"
             ?disabled=${params.configSaving || !params.configDirty}
             @click=${params.onConfigSave}
           >
-            ${params.configSaving ? "Saving…" : "Save"}
+            ${params.configSaving ? t("agentsPage.common.saving") : t("agentsPage.common.save")}
           </button>
         </div>
       </div>
@@ -392,7 +393,7 @@ export function renderAgentSkills(params: {
         !params.configForm
           ? html`
               <div class="callout info" style="margin-top: 12px">
-                Load the gateway config to set per-agent skills.
+                ${t("agentPanelsPage.skills.loadConfigHint")}
               </div>
             `
           : nothing
@@ -400,11 +401,11 @@ export function renderAgentSkills(params: {
       ${
         usingAllowlist
           ? html`
-              <div class="callout info" style="margin-top: 12px">This agent uses a custom skill allowlist.</div>
+              <div class="callout info" style="margin-top: 12px">${t("agentPanelsPage.skills.customAllowlistHint")}</div>
             `
           : html`
               <div class="callout info" style="margin-top: 12px">
-                All skills are enabled. Disabling any skill will create a per-agent allowlist.
+                ${t("agentPanelsPage.skills.allEnabledHint")}
               </div>
             `
       }
@@ -412,7 +413,7 @@ export function renderAgentSkills(params: {
         !reportReady && !params.loading
           ? html`
               <div class="callout info" style="margin-top: 12px">
-                Load skills for this agent to view workspace-specific entries.
+                ${t("agentPanelsPage.skills.loadHint")}
               </div>
             `
           : nothing
@@ -425,20 +426,20 @@ export function renderAgentSkills(params: {
 
       <div class="filters" style="margin-top: 14px;">
         <label class="field" style="flex: 1;">
-          <span>Filter</span>
+          <span>${t("agentPanelsPage.skills.filterLabel")}</span>
           <input
             .value=${params.filter}
             @input=${(e: Event) => params.onFilterChange((e.target as HTMLInputElement).value)}
-            placeholder="Search skills"
+            placeholder=${t("agentPanelsPage.skills.searchPlaceholder")}
           />
         </label>
-        <div class="muted">${filtered.length} shown</div>
+        <div class="muted">${t("agentPanelsPage.skills.shownCount", { count: String(filtered.length) })}</div>
       </div>
 
       ${
         filtered.length === 0
           ? html`
-              <div class="muted" style="margin-top: 16px">No skills found.</div>
+              <div class="muted" style="margin-top: 16px">${t("agentPanelsPage.skills.none")}</div>
             `
           : html`
               <div class="agent-skills-groups" style="margin-top: 16px;">
@@ -511,12 +512,12 @@ function renderAgentSkillRow(
         ${renderSkillStatusChips({ skill })}
         ${
           missing.length > 0
-            ? html`<div class="muted" style="margin-top: 6px;">Missing: ${missing.join(", ")}</div>`
+            ? html`<div class="muted" style="margin-top: 6px;">${t("agentPanelsPage.skills.missingPrefix")} ${missing.join(", ")}</div>`
             : nothing
         }
         ${
           reasons.length > 0
-            ? html`<div class="muted" style="margin-top: 6px;">Reason: ${reasons.join(", ")}</div>`
+            ? html`<div class="muted" style="margin-top: 6px;">${t("agentPanelsPage.skills.reasonPrefix")} ${reasons.join(", ")}</div>`
             : nothing
         }
       </div>
