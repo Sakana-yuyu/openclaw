@@ -113,7 +113,7 @@ function renderSessionSummary(
   }
   const modelItems =
     usage.modelUsage?.slice(0, 6).map((entry) => ({
-      label: entry.model ?? "unknown",
+      label: entry.model ?? t("usagePage.overview.unknown"),
       value: formatCost(entry.totals.totalCost),
       sub: formatTokens(entry.totals.totalTokens),
     })) ?? [];
@@ -243,7 +243,7 @@ function renderSessionDetailPanel(
   onClose: () => void,
 ) {
   const label = session.label || session.key;
-  const displayLabel = label.length > 50 ? label.slice(0, 50) + "…" : label;
+  const displayLabel = label.length > 50 ? `${label.slice(0, 50)}...` : label;
   const usage = session.usage;
 
   const hasRange = timeSeriesCursorStart !== null && timeSeriesCursorEnd !== null;
@@ -254,7 +254,7 @@ function renderSessionDetailPanel(
   const headerStats = filteredUsage
     ? { totalTokens: filteredUsage.totalTokens, totalCost: filteredUsage.totalCost }
     : { totalTokens: usage?.totalTokens ?? 0, totalCost: usage?.totalCost ?? 0 };
-  const cursorIndicator = filteredUsage ? " (filtered)" : "";
+  const cursorIndicator = filteredUsage ? ` (${t("usagePage.details.filtered")})` : "";
 
   return html`
     <div class="card session-detail-panel">
@@ -269,9 +269,9 @@ function renderSessionDetailPanel(
           ${
             usage
               ? html`
-            <span><strong>${formatTokens(headerStats.totalTokens)}</strong> tokens${cursorIndicator}</span>
-            <span><strong>${formatCost(headerStats.totalCost)}</strong>${cursorIndicator}</span>
-          `
+                  <span><strong>${formatTokens(headerStats.totalTokens)}</strong> ${t("usagePage.charts.tokens").toLowerCase()}${cursorIndicator}</span>
+                  <span><strong>${formatCost(headerStats.totalCost)}</strong>${cursorIndicator}</span>
+                `
               : nothing
           }
         </div>
@@ -536,13 +536,13 @@ function renderTimeSeriesCompact(
                 hour: "2-digit",
                 minute: "2-digit",
               }),
-              `${formatTokens(val)} tokens`,
+              `${formatTokens(val)} ${t("usagePage.charts.tokens").toLowerCase()}`,
             ];
             if (breakdownByType) {
-              tooltipLines.push(`Out ${formatTokens(p.output)}`);
-              tooltipLines.push(`In ${formatTokens(p.input)}`);
-              tooltipLines.push(`CW ${formatTokens(p.cacheWrite)}`);
-              tooltipLines.push(`CR ${formatTokens(p.cacheRead)}`);
+              tooltipLines.push(`${t("usagePage.charts.output")} ${formatTokens(p.output)}`);
+              tooltipLines.push(`${t("usagePage.charts.input")} ${formatTokens(p.input)}`);
+              tooltipLines.push(`${t("usagePage.charts.cacheWrite")} ${formatTokens(p.cacheWrite)}`);
+              tooltipLines.push(`${t("usagePage.charts.cacheRead")} ${formatTokens(p.cacheRead)}`);
             }
             const tooltip = tooltipLines.join(" · ");
             const isOutside = hasSelection && (i < rangeStartIdx || i >= rangeEndIdx);
@@ -674,19 +674,21 @@ function renderTimeSeriesCompact(
         ${
           hasSelection
             ? html`
-              <span style="color: var(--accent);">▶ Turns ${rangeStartIdx + 1}–${rangeEndIdx} of ${points.length}</span> · 
-              ${new Date(rangeStartTs).toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" })}–${new Date(rangeEndTs).toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" })} · 
-              ${formatTokens(filteredOutput + filteredInput + filteredCacheRead + filteredCacheWrite)} · 
-              ${formatCost(filteredPoints.reduce((s, p) => s + (p.cost || 0), 0))}
-            `
-            : html`${points.length} msgs · ${formatTokens(cumTokens)} · ${formatCost(cumCost)}`
+                <span style="color: var(--accent);">
+                  ${t("usagePage.details.turns")} ${rangeStartIdx + 1}-${rangeEndIdx} / ${points.length}
+                </span>
+                | ${new Date(rangeStartTs).toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" })}-${new Date(rangeEndTs).toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" })}
+                | ${formatTokens(filteredOutput + filteredInput + filteredCacheRead + filteredCacheWrite)}
+                | ${formatCost(filteredPoints.reduce((s, p) => s + (p.cost || 0), 0))}
+              `
+            : html`${points.length} ${t("usagePage.overview.msgs")} | ${formatTokens(cumTokens)} | ${formatCost(cumCost)}`
         }
       </div>
       ${
         breakdownByType
           ? html`
               <div style="margin-top: 8px;">
-                <div class="card-title" style="font-size: 12px; margin-bottom: 6px; color: var(--text);">Tokens by Type</div>
+                <div class="card-title" style="font-size: 12px; margin-bottom: 6px; color: var(--text);">${t("usagePage.details.tokensByType")}</div>
                 <div class="cost-breakdown-bar" style="height: 18px;">
                   <div class="cost-segment output" style="width: ${pct(filteredOutput, totalTypeTokens).toFixed(1)}%"></div>
                   <div class="cost-segment input" style="width: ${pct(filteredInput, totalTypeTokens).toFixed(1)}%"></div>
@@ -694,20 +696,20 @@ function renderTimeSeriesCompact(
                   <div class="cost-segment cache-read" style="width: ${pct(filteredCacheRead, totalTypeTokens).toFixed(1)}%"></div>
                 </div>
                 <div class="cost-breakdown-legend">
-                  <div class="legend-item" title="Assistant output tokens">
-                    <span class="legend-dot output"></span>Output ${formatTokens(filteredOutput)}
+                  <div class="legend-item" title="${t("usagePage.charts.output")}">
+                    <span class="legend-dot output"></span>${t("usagePage.charts.output")} ${formatTokens(filteredOutput)}
                   </div>
-                  <div class="legend-item" title="User + tool input tokens">
-                    <span class="legend-dot input"></span>Input ${formatTokens(filteredInput)}
+                  <div class="legend-item" title="${t("usagePage.charts.input")}">
+                    <span class="legend-dot input"></span>${t("usagePage.charts.input")} ${formatTokens(filteredInput)}
                   </div>
-                  <div class="legend-item" title="Tokens written to cache">
-                    <span class="legend-dot cache-write"></span>Cache Write ${formatTokens(filteredCacheWrite)}
+                  <div class="legend-item" title="${t("usagePage.charts.cacheWrite")}">
+                    <span class="legend-dot cache-write"></span>${t("usagePage.charts.cacheWrite")} ${formatTokens(filteredCacheWrite)}
                   </div>
-                  <div class="legend-item" title="Tokens read from cache">
-                    <span class="legend-dot cache-read"></span>Cache Read ${formatTokens(filteredCacheRead)}
+                  <div class="legend-item" title="${t("usagePage.charts.cacheRead")}">
+                    <span class="legend-dot cache-read"></span>${t("usagePage.charts.cacheRead")} ${formatTokens(filteredCacheRead)}
                   </div>
                 </div>
-                <div class="cost-breakdown-total">Total: ${formatTokens(totalTypeTokens)}</div>
+                <div class="cost-breakdown-total">${t("usagePage.charts.total")}: ${formatTokens(totalTypeTokens)}</div>
               </div>
             `
           : nothing
@@ -725,7 +727,7 @@ function renderContextPanel(
   if (!contextWeight) {
     return html`
       <div class="context-details-panel">
-        <div class="muted" style="padding: 20px; text-align: center">No context data</div>
+        <div class="muted" style="padding: 20px; text-align: center">${t("usagePage.details.noContextData")}</div>
       </div>
     `;
   }
@@ -743,7 +745,7 @@ function renderContextPanel(
   if (usage && usage.totalTokens > 0) {
     const inputTokens = usage.input + usage.cacheRead;
     if (inputTokens > 0) {
-      contextPct = `~${Math.min((totalContextTokens / inputTokens) * 100, 100).toFixed(0)}% of input`;
+      contextPct = `~${Math.min((totalContextTokens / inputTokens) * 100, 100).toFixed(0)}% ${t("usagePage.details.ofInput")}`;
     }
   }
 
@@ -767,31 +769,31 @@ function renderContextPanel(
   return html`
     <div class="context-details-panel">
       <div class="context-breakdown-header">
-        <div class="card-title" style="font-size: 12px; color: var(--text);">System Prompt Breakdown</div>
+        <div class="card-title" style="font-size: 12px; color: var(--text);">${t("usagePage.details.systemPromptBreakdown")}</div>
         ${
           hasMore
             ? html`<button class="context-expand-btn" @click=${onToggleExpanded}>
-                ${showAll ? "Collapse" : "Expand all"}
+                ${showAll ? t("usagePage.details.collapse") : t("usagePage.details.expandAll")}
               </button>`
             : nothing
         }
       </div>
       <p class="context-weight-desc">
-        ${contextPct || "Base context per message"}
+        ${contextPct || t("usagePage.details.baseContext")}
       </p>
       <div class="context-stacked-bar">
-        <div class="context-segment system" style="width: ${pct(systemTokens, totalContextTokens).toFixed(1)}%" title="System: ~${formatTokens(systemTokens)}"></div>
-        <div class="context-segment skills" style="width: ${pct(skillsTokens, totalContextTokens).toFixed(1)}%" title="Skills: ~${formatTokens(skillsTokens)}"></div>
-        <div class="context-segment tools" style="width: ${pct(toolsTokens, totalContextTokens).toFixed(1)}%" title="Tools: ~${formatTokens(toolsTokens)}"></div>
-        <div class="context-segment files" style="width: ${pct(filesTokens, totalContextTokens).toFixed(1)}%" title="Files: ~${formatTokens(filesTokens)}"></div>
+        <div class="context-segment system" style="width: ${pct(systemTokens, totalContextTokens).toFixed(1)}%" title="${t("usagePage.details.system")}: ~${formatTokens(systemTokens)}"></div>
+        <div class="context-segment skills" style="width: ${pct(skillsTokens, totalContextTokens).toFixed(1)}%" title="${t("usagePage.details.skills")}: ~${formatTokens(skillsTokens)}"></div>
+        <div class="context-segment tools" style="width: ${pct(toolsTokens, totalContextTokens).toFixed(1)}%" title="${t("usagePage.details.tools")}: ~${formatTokens(toolsTokens)}"></div>
+        <div class="context-segment files" style="width: ${pct(filesTokens, totalContextTokens).toFixed(1)}%" title="${t("usagePage.details.files")}: ~${formatTokens(filesTokens)}"></div>
       </div>
       <div class="context-legend">
-        <span class="legend-item"><span class="legend-dot system"></span>Sys ~${formatTokens(systemTokens)}</span>
-        <span class="legend-item"><span class="legend-dot skills"></span>Skills ~${formatTokens(skillsTokens)}</span>
-        <span class="legend-item"><span class="legend-dot tools"></span>Tools ~${formatTokens(toolsTokens)}</span>
-        <span class="legend-item"><span class="legend-dot files"></span>Files ~${formatTokens(filesTokens)}</span>
+        <span class="legend-item"><span class="legend-dot system"></span>${t("usagePage.details.system")} ~${formatTokens(systemTokens)}</span>
+        <span class="legend-item"><span class="legend-dot skills"></span>${t("usagePage.details.skills")} ~${formatTokens(skillsTokens)}</span>
+        <span class="legend-item"><span class="legend-dot tools"></span>${t("usagePage.details.tools")} ~${formatTokens(toolsTokens)}</span>
+        <span class="legend-item"><span class="legend-dot files"></span>${t("usagePage.details.files")} ~${formatTokens(filesTokens)}</span>
       </div>
-      <div class="context-total">Total: ~${formatTokens(totalContextTokens)}</div>
+      <div class="context-total">${t("usagePage.charts.total")}: ~${formatTokens(totalContextTokens)}</div>
       <div class="context-breakdown-grid">
         ${
           skillsList.length > 0
@@ -799,7 +801,7 @@ function renderContextPanel(
                 const more = skillsList.length - skillsTop.length;
                 return html`
                   <div class="context-breakdown-card">
-                    <div class="context-breakdown-title">Skills (${skillsList.length})</div>
+                    <div class="context-breakdown-title">${t("usagePage.details.skills")} (${skillsList.length})</div>
                     <div class="context-breakdown-list">
                       ${skillsTop.map(
                         (s) => html`
@@ -812,7 +814,7 @@ function renderContextPanel(
                     </div>
                     ${
                       more > 0
-                        ? html`<div class="context-breakdown-more">+${more} more</div>`
+                        ? html`<div class="context-breakdown-more">+${more} ${t("usagePage.details.more")}</div>`
                         : nothing
                     }
                   </div>
@@ -826,7 +828,7 @@ function renderContextPanel(
                 const more = toolsList.length - toolsTop.length;
                 return html`
                   <div class="context-breakdown-card">
-                    <div class="context-breakdown-title">Tools (${toolsList.length})</div>
+                    <div class="context-breakdown-title">${t("usagePage.details.tools")} (${toolsList.length})</div>
                     <div class="context-breakdown-list">
                       ${toolsTop.map(
                         (t) => html`
@@ -839,7 +841,7 @@ function renderContextPanel(
                     </div>
                     ${
                       more > 0
-                        ? html`<div class="context-breakdown-more">+${more} more</div>`
+                        ? html`<div class="context-breakdown-more">+${more} ${t("usagePage.details.more")}</div>`
                         : nothing
                     }
                   </div>
@@ -853,7 +855,7 @@ function renderContextPanel(
                 const more = filesList.length - filesTop.length;
                 return html`
                   <div class="context-breakdown-card">
-                    <div class="context-breakdown-title">Files (${filesList.length})</div>
+                    <div class="context-breakdown-title">${t("usagePage.details.files")} (${filesList.length})</div>
                     <div class="context-breakdown-list">
                       ${filesTop.map(
                         (f) => html`
@@ -866,7 +868,7 @@ function renderContextPanel(
                     </div>
                     ${
                       more > 0
-                        ? html`<div class="context-breakdown-more">+${more} more</div>`
+                        ? html`<div class="context-breakdown-more">+${more} ${t("usagePage.details.more")}</div>`
                         : nothing
                     }
                   </div>
@@ -901,16 +903,16 @@ function renderSessionLogsCompact(
   if (loading) {
     return html`
       <div class="session-logs-compact">
-        <div class="session-logs-header">Conversation</div>
-        <div class="muted" style="padding: 20px; text-align: center">Loading...</div>
+        <div class="session-logs-header">${t("usagePage.details.conversation")}</div>
+        <div class="muted" style="padding: 20px; text-align: center">${t("usagePage.header.loading")}</div>
       </div>
     `;
   }
   if (!logs || logs.length === 0) {
     return html`
       <div class="session-logs-compact">
-        <div class="session-logs-header">Conversation</div>
-        <div class="muted" style="padding: 20px; text-align: center">No messages</div>
+        <div class="session-logs-header">${t("usagePage.details.conversation")}</div>
+        <div class="muted" style="padding: 20px; text-align: center">${t("usagePage.details.noMessages")}</div>
       </div>
     `;
   }
@@ -962,7 +964,7 @@ function renderSessionLogsCompact(
   const hasCursorFilter = cursorStart != null && cursorEnd != null;
   const displayedCount =
     hasActiveFilters || hasCursorFilter
-      ? `${filteredEntries.length} of ${logs.length} ${hasCursorFilter ? "(timeline filtered)" : ""}`
+      ? `${filteredEntries.length} ${t("usagePage.details.of")} ${logs.length}${hasCursorFilter ? ` (${t("usagePage.details.timelineFiltered")})` : ""}`
       : `${logs.length}`;
 
   const roleSelected = new Set(filters.roles);
@@ -971,9 +973,9 @@ function renderSessionLogsCompact(
   return html`
     <div class="session-logs-compact">
       <div class="session-logs-header">
-        <span>Conversation <span style="font-weight: normal; color: var(--muted);">(${displayedCount} messages)</span></span>
+        <span>${t("usagePage.details.conversation")} <span style="font-weight: normal; color: var(--muted);">(${displayedCount} ${t("usagePage.details.messages").toLowerCase()})</span></span>
         <button class="btn btn-sm usage-action-btn usage-secondary-btn" @click=${onToggleExpandedAll}>
-          ${expandedAll ? "Collapse All" : "Expand All"}
+          ${expandedAll ? t("usagePage.details.collapseAll") : t("usagePage.details.expandAll")}
         </button>
       </div>
       <div class="usage-filters-inline" style="margin: 10px 12px;">
@@ -987,10 +989,10 @@ function renderSessionLogsCompact(
               ),
             )}
         >
-          <option value="user" ?selected=${roleSelected.has("user")}>User</option>
-          <option value="assistant" ?selected=${roleSelected.has("assistant")}>Assistant</option>
-          <option value="tool" ?selected=${roleSelected.has("tool")}>Tool</option>
-          <option value="toolResult" ?selected=${roleSelected.has("toolResult")}>Tool result</option>
+          <option value="user" ?selected=${roleSelected.has("user")}>${t("usagePage.details.user")}</option>
+          <option value="assistant" ?selected=${roleSelected.has("assistant")}>${t("usagePage.details.assistant")}</option>
+          <option value="tool" ?selected=${roleSelected.has("tool")}>${t("usagePage.details.tool")}</option>
+          <option value="toolResult" ?selected=${roleSelected.has("toolResult")}>${t("usagePage.details.toolResult")}</option>
         </select>
         <select
           multiple
@@ -1014,16 +1016,16 @@ function renderSessionLogsCompact(
             @change=${(event: Event) =>
               onFilterHasToolsChange((event.target as HTMLInputElement).checked)}
           />
-          Has tools
+          ${t("usagePage.details.hasTools")}
         </label>
         <input
           type="text"
-          placeholder="Search conversation"
+          placeholder="${t("usagePage.details.searchConversation")}"
           .value=${filters.query}
           @input=${(event: Event) => onFilterQueryChange((event.target as HTMLInputElement).value)}
         />
         <button class="btn btn-sm usage-action-btn usage-secondary-btn" @click=${onFilterClear}>
-          Clear
+          ${t("usagePage.header.clear")}
         </button>
       </div>
       <div class="session-logs-list">
@@ -1031,7 +1033,13 @@ function renderSessionLogsCompact(
           const { log, toolInfo, cleanContent } = entry;
           const roleClass = log.role === "user" ? "user" : "assistant";
           const roleLabel =
-            log.role === "user" ? "You" : log.role === "assistant" ? "Assistant" : "Tool";
+            log.role === "user"
+              ? t("usagePage.details.you")
+              : log.role === "assistant"
+                ? t("usagePage.details.assistant")
+                : log.role === "toolResult"
+                  ? t("usagePage.details.toolResult")
+                  : t("usagePage.details.tool");
           return html`
           <div class="session-log-entry ${roleClass}">
             <div class="session-log-meta">
@@ -1062,7 +1070,7 @@ function renderSessionLogsCompact(
         ${
           filteredEntries.length === 0
             ? html`
-                <div class="muted" style="padding: 12px">No messages match the filters.</div>
+                <div class="muted" style="padding: 12px">${t("usagePage.details.noMessagesMatchFilters")}</div>
               `
             : nothing
         }
@@ -1082,3 +1090,4 @@ export {
   CHART_BAR_WIDTH_RATIO,
   CHART_MAX_BAR_WIDTH,
 };
+

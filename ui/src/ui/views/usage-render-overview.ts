@@ -1,4 +1,5 @@
 import { html, nothing } from "lit";
+import { t } from "../../i18n/index.ts";
 import { formatDurationCompact } from "../../../../src/infra/format-time/format-duration.ts";
 import {
   formatCost,
@@ -71,59 +72,82 @@ function renderFilterChips(
     selectedSessions.length === 1 ? sessions.find((s) => s.key === selectedSessions[0]) : null;
   const sessionsLabel = selectedSession
     ? (selectedSession.label || selectedSession.key).slice(0, 20) +
-      ((selectedSession.label || selectedSession.key).length > 20 ? "…" : "")
+      ((selectedSession.label || selectedSession.key).length > 20 ? "..." : "")
     : selectedSessions.length === 1
-      ? selectedSessions[0].slice(0, 8) + "…"
-      : `${selectedSessions.length} sessions`;
+      ? `${selectedSessions[0].slice(0, 8)}...`
+      : t("usagePage.chips.sessionsCount").replace("{count}", `${selectedSessions.length}`);
   const sessionsFullName = selectedSession
     ? selectedSession.label || selectedSession.key
     : selectedSessions.length === 1
       ? selectedSessions[0]
       : selectedSessions.join(", ");
 
-  const daysLabel = selectedDays.length === 1 ? selectedDays[0] : `${selectedDays.length} days`;
+  const daysLabel =
+    selectedDays.length === 1
+      ? selectedDays[0]
+      : t("usagePage.chips.daysCount").replace("{count}", `${selectedDays.length}`);
   const hoursLabel =
-    selectedHours.length === 1 ? `${selectedHours[0]}:00` : `${selectedHours.length} hours`;
+    selectedHours.length === 1
+      ? `${selectedHours[0]}:00`
+      : t("usagePage.chips.hoursCount").replace("{count}", `${selectedHours.length}`);
 
   return html`
     <div class="active-filters">
       ${
         selectedDays.length > 0
           ? html`
-            <div class="filter-chip">
-              <span class="filter-chip-label">Days: ${daysLabel}</span>
-              <button class="filter-chip-remove" @click=${onClearDays} title="Remove filter">×</button>
-            </div>
-          `
+              <div class="filter-chip">
+                <span class="filter-chip-label">${t("usagePage.chips.days")}: ${daysLabel}</span>
+                <button
+                  class="filter-chip-remove"
+                  @click=${onClearDays}
+                  title="${t("usagePage.chips.removeFilter")}" 
+                >
+                  ×
+                </button>
+              </div>
+            `
           : nothing
       }
       ${
         selectedHours.length > 0
           ? html`
-            <div class="filter-chip">
-              <span class="filter-chip-label">Hours: ${hoursLabel}</span>
-              <button class="filter-chip-remove" @click=${onClearHours} title="Remove filter">×</button>
-            </div>
-          `
+              <div class="filter-chip">
+                <span class="filter-chip-label">${t("usagePage.chips.hours")}: ${hoursLabel}</span>
+                <button
+                  class="filter-chip-remove"
+                  @click=${onClearHours}
+                  title="${t("usagePage.chips.removeFilter")}" 
+                >
+                  ×
+                </button>
+              </div>
+            `
           : nothing
       }
       ${
         selectedSessions.length > 0
           ? html`
-            <div class="filter-chip" title="${sessionsFullName}">
-              <span class="filter-chip-label">Session: ${sessionsLabel}</span>
-              <button class="filter-chip-remove" @click=${onClearSessions} title="Remove filter">×</button>
-            </div>
-          `
+              <div class="filter-chip" title="${sessionsFullName}">
+                <span class="filter-chip-label">${t("usagePage.chips.session")}: ${sessionsLabel}</span>
+                <button
+                  class="filter-chip-remove"
+                  @click=${onClearSessions}
+                  title="${t("usagePage.chips.removeFilter")}" 
+                >
+                  ×
+                </button>
+              </div>
+            `
           : nothing
       }
       ${
         (selectedDays.length > 0 || selectedHours.length > 0) && selectedSessions.length > 0
           ? html`
-            <button class="btn btn-sm filter-clear-btn" @click=${onClearFilters}>
-              Clear All
-            </button>
-          `
+              <button class="btn btn-sm filter-clear-btn" @click=${onClearFilters}>
+                ${t("usagePage.chips.clearAll")}
+              </button>
+            `
           : nothing
       }
     </div>
@@ -141,8 +165,8 @@ function renderDailyChartCompact(
   if (!daily.length) {
     return html`
       <div class="daily-chart-compact">
-        <div class="sessions-panel-title">Daily Usage</div>
-        <div class="muted" style="padding: 20px; text-align: center">No data</div>
+        <div class="sessions-panel-title">${t("usagePage.charts.dailyUsage")}</div>
+        <div class="muted" style="padding: 20px; text-align: center">${t("usagePage.charts.noData")}</div>
       </div>
     `;
   }
@@ -163,16 +187,18 @@ function renderDailyChartCompact(
             class="toggle-btn ${dailyChartMode === "total" ? "active" : ""}"
             @click=${() => onDailyChartModeChange("total")}
           >
-            Total
+            ${t("usagePage.charts.total")}
           </button>
           <button
             class="toggle-btn ${dailyChartMode === "by-type" ? "active" : ""}"
             @click=${() => onDailyChartModeChange("by-type")}
           >
-            By Type
+            ${t("usagePage.charts.byType")}
           </button>
         </div>
-        <div class="card-title">Daily ${isTokenMode ? "Token" : "Cost"} Usage</div>
+        <div class="card-title">
+          ${isTokenMode ? t("usagePage.charts.dailyTokenUsage") : t("usagePage.charts.dailyCostUsage")}
+        </div>
       </div>
       <div class="daily-chart">
         <div class="daily-chart-bars" style="--bar-max-width: ${barMaxWidth}px">
@@ -204,16 +230,16 @@ function renderDailyChartCompact(
               dailyChartMode === "by-type"
                 ? isTokenMode
                   ? [
-                      `Output ${formatTokens(d.output)}`,
-                      `Input ${formatTokens(d.input)}`,
-                      `Cache write ${formatTokens(d.cacheWrite)}`,
-                      `Cache read ${formatTokens(d.cacheRead)}`,
+                      `${t("usagePage.charts.output")} ${formatTokens(d.output)}`,
+                      `${t("usagePage.charts.input")} ${formatTokens(d.input)}`,
+                      `${t("usagePage.charts.cacheWrite")} ${formatTokens(d.cacheWrite)}`,
+                      `${t("usagePage.charts.cacheRead")} ${formatTokens(d.cacheRead)}`,
                     ]
                   : [
-                      `Output ${formatCost(d.outputCost ?? 0)}`,
-                      `Input ${formatCost(d.inputCost ?? 0)}`,
-                      `Cache write ${formatCost(d.cacheWriteCost ?? 0)}`,
-                      `Cache read ${formatCost(d.cacheReadCost ?? 0)}`,
+                      `${t("usagePage.charts.output")} ${formatCost(d.outputCost ?? 0)}`,
+                      `${t("usagePage.charts.input")} ${formatCost(d.inputCost ?? 0)}`,
+                      `${t("usagePage.charts.cacheWrite")} ${formatCost(d.cacheWriteCost ?? 0)}`,
+                      `${t("usagePage.charts.cacheRead")} ${formatCost(d.cacheReadCost ?? 0)}`,
                     ]
                 : [];
             const totalLabel = isTokenMode ? formatTokens(d.totalTokens) : formatCost(d.totalCost);
@@ -250,7 +276,7 @@ function renderDailyChartCompact(
                 <div class="daily-bar-label" style="${labelStyle}">${shortLabel}</div>
                 <div class="daily-bar-tooltip">
                   <strong>${formatFullDate(d.date)}</strong><br />
-                  ${formatTokens(d.totalTokens)} tokens<br />
+                  ${formatTokens(d.totalTokens)} ${t("usagePage.charts.tokens").toLowerCase()}<br />
                   ${formatCost(d.totalCost)}
                   ${
                     breakdownLines.length
@@ -280,25 +306,29 @@ function renderCostBreakdownCompact(totals: UsageTotals, mode: "tokens" | "cost"
 
   return html`
     <div class="cost-breakdown cost-breakdown-compact">
-      <div class="cost-breakdown-header">${isTokenMode ? "Tokens" : "Cost"} by Type</div>
+      <div class="cost-breakdown-header">
+        ${isTokenMode ? t("usagePage.charts.tokens") : t("usagePage.charts.cost")}
+        ${" "}
+        ${t("usagePage.charts.byType").toLowerCase()}
+      </div>
       <div class="cost-breakdown-bar">
         <div class="cost-segment output" style="width: ${(isTokenMode ? tokenPcts.output : breakdown.output.pct).toFixed(1)}%"
-          title="Output: ${isTokenMode ? formatTokens(totals.output) : formatCost(breakdown.output.cost)}"></div>
+          title="${t("usagePage.charts.output")}: ${isTokenMode ? formatTokens(totals.output) : formatCost(breakdown.output.cost)}"></div>
         <div class="cost-segment input" style="width: ${(isTokenMode ? tokenPcts.input : breakdown.input.pct).toFixed(1)}%"
-          title="Input: ${isTokenMode ? formatTokens(totals.input) : formatCost(breakdown.input.cost)}"></div>
+          title="${t("usagePage.charts.input")}: ${isTokenMode ? formatTokens(totals.input) : formatCost(breakdown.input.cost)}"></div>
         <div class="cost-segment cache-write" style="width: ${(isTokenMode ? tokenPcts.cacheWrite : breakdown.cacheWrite.pct).toFixed(1)}%"
-          title="Cache Write: ${isTokenMode ? formatTokens(totals.cacheWrite) : formatCost(breakdown.cacheWrite.cost)}"></div>
+          title="${t("usagePage.charts.cacheWrite")}: ${isTokenMode ? formatTokens(totals.cacheWrite) : formatCost(breakdown.cacheWrite.cost)}"></div>
         <div class="cost-segment cache-read" style="width: ${(isTokenMode ? tokenPcts.cacheRead : breakdown.cacheRead.pct).toFixed(1)}%"
-          title="Cache Read: ${isTokenMode ? formatTokens(totals.cacheRead) : formatCost(breakdown.cacheRead.cost)}"></div>
+          title="${t("usagePage.charts.cacheRead")}: ${isTokenMode ? formatTokens(totals.cacheRead) : formatCost(breakdown.cacheRead.cost)}"></div>
       </div>
       <div class="cost-breakdown-legend">
-        <span class="legend-item"><span class="legend-dot output"></span>Output ${isTokenMode ? formatTokens(totals.output) : formatCost(breakdown.output.cost)}</span>
-        <span class="legend-item"><span class="legend-dot input"></span>Input ${isTokenMode ? formatTokens(totals.input) : formatCost(breakdown.input.cost)}</span>
-        <span class="legend-item"><span class="legend-dot cache-write"></span>Cache Write ${isTokenMode ? formatTokens(totals.cacheWrite) : formatCost(breakdown.cacheWrite.cost)}</span>
-        <span class="legend-item"><span class="legend-dot cache-read"></span>Cache Read ${isTokenMode ? formatTokens(totals.cacheRead) : formatCost(breakdown.cacheRead.cost)}</span>
+        <span class="legend-item"><span class="legend-dot output"></span>${t("usagePage.charts.output")} ${isTokenMode ? formatTokens(totals.output) : formatCost(breakdown.output.cost)}</span>
+        <span class="legend-item"><span class="legend-dot input"></span>${t("usagePage.charts.input")} ${isTokenMode ? formatTokens(totals.input) : formatCost(breakdown.input.cost)}</span>
+        <span class="legend-item"><span class="legend-dot cache-write"></span>${t("usagePage.charts.cacheWrite")} ${isTokenMode ? formatTokens(totals.cacheWrite) : formatCost(breakdown.cacheWrite.cost)}</span>
+        <span class="legend-item"><span class="legend-dot cache-read"></span>${t("usagePage.charts.cacheRead")} ${isTokenMode ? formatTokens(totals.cacheRead) : formatCost(breakdown.cacheRead.cost)}</span>
       </div>
       <div class="cost-breakdown-total">
-        Total: ${isTokenMode ? formatTokens(totals.totalTokens) : formatCost(totals.totalCost)}
+        ${t("usagePage.charts.total")}: ${isTokenMode ? formatTokens(totals.totalTokens) : formatCost(totals.totalCost)}
       </div>
     </div>
   `;
@@ -387,23 +417,23 @@ function renderUsageInsights(
   const errorRatePct = stats.errorRate * 100;
   const throughputLabel =
     stats.throughputTokensPerMin !== undefined
-      ? `${formatTokens(Math.round(stats.throughputTokensPerMin))} tok/min`
+      ? `${formatTokens(Math.round(stats.throughputTokensPerMin))} ${t("usagePage.overview.tokMin")}`
       : "—";
   const throughputCostLabel =
     stats.throughputCostPerMin !== undefined
-      ? `${formatCost(stats.throughputCostPerMin, 4)} / min`
+      ? `${formatCost(stats.throughputCostPerMin, 4)} ${t("usagePage.overview.costMin")}`
       : "—";
   const avgDurationLabel =
     stats.durationCount > 0
       ? (formatDurationCompact(stats.avgDurationMs, { spaced: true }) ?? "—")
       : "—";
-  const cacheHint = ("usagePage.overview.cacheHitRateHint");
-  const errorHint = ("usagePage.overview.errorRateHint");
-  const throughputHint = ("usagePage.overview.throughputHint");
-  const tokensHint = ("usagePage.overview.avgTokensMsgHint");
+  const cacheHint = t("usagePage.overview.cacheHitRateHint");
+  const errorHint = t("usagePage.overview.errorRateHint");
+  const throughputHint = t("usagePage.overview.throughputHint");
+  const tokensHint = t("usagePage.overview.avgTokensMsgHint");
   const costHint = showCostHint
-    ? ("usagePage.overview.avgCostMsgMissingHint")
-    : ("usagePage.overview.avgCostMsgHint");
+    ? t("usagePage.overview.avgCostMsgMissingHint")
+    : t("usagePage.overview.avgCostMsgHint");
 
   const errorDays = aggregates.daily
     .filter((day) => day.messages > 0 && day.errors > 0)
@@ -412,7 +442,7 @@ function renderUsageInsights(
       return {
         label: formatDayLabel(day.date),
         value: `${(rate * 100).toFixed(2)}%`,
-        sub: `${day.errors} errors · ${day.messages} msgs · ${formatTokens(day.tokens)}`,
+        sub: `${day.errors} ${t("usagePage.overview.errorsLc")} · ${day.messages} ${t("usagePage.overview.msgs")} · ${formatTokens(day.tokens)}`,
         rate,
       };
     })
@@ -421,19 +451,19 @@ function renderUsageInsights(
     .map(({ rate: _rate, ...rest }) => rest);
 
   const topModels = aggregates.byModel.slice(0, 5).map((entry) => ({
-    label: entry.model ?? "unknown",
+    label: entry.model ?? t("usagePage.overview.unknown"),
     value: formatCost(entry.totals.totalCost),
-    sub: `${formatTokens(entry.totals.totalTokens)} · ${entry.count} msgs`,
+    sub: `${formatTokens(entry.totals.totalTokens)} · ${entry.count} ${t("usagePage.overview.msgs")}`,
   }));
   const topProviders = aggregates.byProvider.slice(0, 5).map((entry) => ({
-    label: entry.provider ?? "unknown",
+    label: entry.provider ?? t("usagePage.overview.unknown"),
     value: formatCost(entry.totals.totalCost),
-    sub: `${formatTokens(entry.totals.totalTokens)} · ${entry.count} msgs`,
+    sub: `${formatTokens(entry.totals.totalTokens)} · ${entry.count} ${t("usagePage.overview.msgs")}`,
   }));
   const topTools = aggregates.tools.tools.slice(0, 6).map((tool) => ({
     label: tool.name,
     value: `${tool.count}`,
-    sub: "calls",
+    sub: t("usagePage.overview.calls"),
   }));
   const topAgents = aggregates.byAgent.slice(0, 5).map((entry) => ({
     label: entry.agentId,
@@ -448,61 +478,61 @@ function renderUsageInsights(
 
   return html`
     <section class="card" style="margin-top: 16px;">
-      <div class="card-title">${("usagePage.overview.title")}</div>
+      <div class="card-title">${t("usagePage.overview.title")}</div>
       <div class="usage-summary-grid">
         <div class="usage-summary-card">
           <div class="usage-summary-title">
-            ${("usagePage.overview.messages")}
-            <span class="usage-summary-hint" title="${("usagePage.overview.messagesHint")}">?</span>
+            ${t("usagePage.overview.messages")}
+            <span class="usage-summary-hint" title="${t("usagePage.overview.messagesHint")}">?</span>
           </div>
           <div class="usage-summary-value">${aggregates.messages.total}</div>
           <div class="usage-summary-sub">
-            ${aggregates.messages.user} ${("usagePage.overview.user")} · ${aggregates.messages.assistant} ${("usagePage.overview.assistant")}
+            ${aggregates.messages.user} ${t("usagePage.overview.user")} · ${aggregates.messages.assistant} ${t("usagePage.overview.assistant")}
           </div>
         </div>
         <div class="usage-summary-card">
           <div class="usage-summary-title">
-            ${("usagePage.overview.toolCalls")}
-            <span class="usage-summary-hint" title="${("usagePage.overview.toolCallsHint")}">?</span>
+            ${t("usagePage.overview.toolCalls")}
+            <span class="usage-summary-hint" title="${t("usagePage.overview.toolCallsHint")}">?</span>
           </div>
           <div class="usage-summary-value">${aggregates.tools.totalCalls}</div>
-          <div class="usage-summary-sub">${("usagePage.overview.toolsUsed").replace("{count}", `${aggregates.tools.uniqueTools}`)}</div>
+          <div class="usage-summary-sub">${t("usagePage.overview.toolsUsed").replace("{count}", `${aggregates.tools.uniqueTools}`)}</div>
         </div>
         <div class="usage-summary-card">
           <div class="usage-summary-title">
-            ${("usagePage.overview.errors")}
-            <span class="usage-summary-hint" title="${("usagePage.overview.errorsHint")}">?</span>
+            ${t("usagePage.overview.errors")}
+            <span class="usage-summary-hint" title="${t("usagePage.overview.errorsHint")}">?</span>
           </div>
           <div class="usage-summary-value">${aggregates.messages.errors}</div>
-          <div class="usage-summary-sub">${("usagePage.overview.toolResults").replace("{count}", `${aggregates.messages.toolResults}`)}</div>
+          <div class="usage-summary-sub">${t("usagePage.overview.toolResults").replace("{count}", `${aggregates.messages.toolResults}`)}</div>
         </div>
         <div class="usage-summary-card">
           <div class="usage-summary-title">
-            ${("usagePage.overview.avgTokensMsg")}
+            ${t("usagePage.overview.avgTokensMsg")}
             <span class="usage-summary-hint" title=${tokensHint}>?</span>
           </div>
           <div class="usage-summary-value">${formatTokens(avgTokens)}</div>
-          <div class="usage-summary-sub">${("usagePage.overview.acrossMessages").replace("{count}", `${aggregates.messages.total || 0}`)}</div>
+          <div class="usage-summary-sub">${t("usagePage.overview.acrossMessages").replace("{count}", `${aggregates.messages.total || 0}`)}</div>
         </div>
         <div class="usage-summary-card">
           <div class="usage-summary-title">
-            ${("usagePage.overview.avgCostMsg")}
+            ${t("usagePage.overview.avgCostMsg")}
             <span class="usage-summary-hint" title=${costHint}>?</span>
           </div>
           <div class="usage-summary-value">${formatCost(avgCost, 4)}</div>
-          <div class="usage-summary-sub">${formatCost(totals.totalCost)} ${("usagePage.overview.total").toLowerCase()}</div>
+          <div class="usage-summary-sub">${formatCost(totals.totalCost)} ${t("usagePage.overview.total")}</div>
         </div>
         <div class="usage-summary-card">
           <div class="usage-summary-title">
-            ${("usagePage.overview.sessions")}
-            <span class="usage-summary-hint" title="${("usagePage.overview.sessionsHint")}">?</span>
+            ${t("usagePage.overview.sessions")}
+            <span class="usage-summary-hint" title="${t("usagePage.overview.sessionsHint")}">?</span>
           </div>
           <div class="usage-summary-value">${sessionCount}</div>
-          <div class="usage-summary-sub">${("usagePage.overview.ofTotalInRange").replace("{total}", `${totalSessions}`)}</div>
+          <div class="usage-summary-sub">${t("usagePage.overview.ofTotalInRange").replace("{total}", `${totalSessions}`)}</div>
         </div>
         <div class="usage-summary-card">
           <div class="usage-summary-title">
-            ${("usagePage.overview.throughput")}
+            ${t("usagePage.overview.throughput")}
             <span class="usage-summary-hint" title=${throughputHint}>?</span>
           </div>
           <div class="usage-summary-value">${throughputLabel}</div>
@@ -510,33 +540,33 @@ function renderUsageInsights(
         </div>
         <div class="usage-summary-card">
           <div class="usage-summary-title">
-            ${("usagePage.overview.errorRate")}
+            ${t("usagePage.overview.errorRate")}
             <span class="usage-summary-hint" title=${errorHint}>?</span>
           </div>
           <div class="usage-summary-value ${errorRatePct > 5 ? "bad" : errorRatePct > 1 ? "warn" : "good"}">${errorRatePct.toFixed(2)}%</div>
           <div class="usage-summary-sub">
-            ${aggregates.messages.errors} ${("usagePage.overview.errorsLc")} · ${("usagePage.overview.avgSession").replace("{value}", avgDurationLabel)}
+            ${aggregates.messages.errors} ${t("usagePage.overview.errorsLc")} · ${t("usagePage.overview.avgSession").replace("{value}", avgDurationLabel)}
           </div>
         </div>
         <div class="usage-summary-card">
           <div class="usage-summary-title">
-            ${("usagePage.overview.cacheHitRate")}
+            ${t("usagePage.overview.cacheHitRate")}
             <span class="usage-summary-hint" title=${cacheHint}>?</span>
           </div>
           <div class="usage-summary-value ${cacheHitRate > 0.6 ? "good" : cacheHitRate > 0.3 ? "warn" : "bad"}">${cacheHitLabel}</div>
           <div class="usage-summary-sub">
-            ${formatTokens(totals.cacheRead)} ${("usagePage.overview.cached")} · ${formatTokens(cacheBase)} ${("usagePage.overview.prompt")}
+            ${formatTokens(totals.cacheRead)} ${t("usagePage.overview.cached")} · ${formatTokens(cacheBase)} ${t("usagePage.overview.prompt")}
           </div>
         </div>
       </div>
       <div class="usage-insights-grid">
-        ${renderInsightList(("usagePage.overview.topModels"), topModels, ("usagePage.overview.noModelData"))}
-        ${renderInsightList(("usagePage.overview.topProviders"), topProviders, ("usagePage.overview.noProviderData"))}
-        ${renderInsightList(("usagePage.overview.topTools"), topTools, ("usagePage.overview.noToolCalls"))}
-        ${renderInsightList(("usagePage.overview.topAgents"), topAgents, ("usagePage.overview.noAgentData"))}
-        ${renderInsightList(("usagePage.overview.topChannels"), topChannels, ("usagePage.overview.noChannelData"))}
-        ${renderPeakErrorList(("usagePage.overview.peakErrorDays"), errorDays, ("usagePage.overview.noErrorData"))}
-        ${renderPeakErrorList(("usagePage.overview.peakErrorHours"), errorHours, ("usagePage.overview.noErrorData"))}
+        ${renderInsightList(t("usagePage.overview.topModels"), topModels, t("usagePage.overview.noModelData"))}
+        ${renderInsightList(t("usagePage.overview.topProviders"), topProviders, t("usagePage.overview.noProviderData"))}
+        ${renderInsightList(t("usagePage.overview.topTools"), topTools, t("usagePage.overview.noToolCalls"))}
+        ${renderInsightList(t("usagePage.overview.topAgents"), topAgents, t("usagePage.overview.noAgentData"))}
+        ${renderInsightList(t("usagePage.overview.topChannels"), topChannels, t("usagePage.overview.noChannelData"))}
+        ${renderPeakErrorList(t("usagePage.overview.peakErrorDays"), errorDays, t("usagePage.overview.noErrorData"))}
+        ${renderPeakErrorList(t("usagePage.overview.peakErrorHours"), errorHours, t("usagePage.overview.noErrorData"))}
       </div>
     </section>
   `;
@@ -667,13 +697,13 @@ function renderSessionsCard(
         <div class="session-bar-actions">
           <button
             class="session-copy-btn"
-            title="Copy session name"
+            title="${t("usagePage.charts.copyTitle")}"
             @click=${(e: MouseEvent) => {
               e.stopPropagation();
               void copySessionName(s);
             }}
           >
-            Copy
+            ${t("usagePage.charts.copy")}
           </button>
           <div class="session-bar-value">${isTokenMode ? formatTokens(value) : formatCost(value)}</div>
         </div>
@@ -692,46 +722,46 @@ function renderSessionsCard(
   return html`
     <div class="card sessions-card">
       <div class="sessions-card-header">
-        <div class="card-title">Sessions</div>
+        <div class="card-title">${t("usagePage.charts.sessions")}</div>
         <div class="sessions-card-count">
-          ${sessions.length} shown${totalSessions !== sessions.length ? ` · ${totalSessions} total` : ""}
+          ${sessions.length} ${t("usagePage.charts.shown")}${totalSessions !== sessions.length ? ` · ${totalSessions} ${t("usagePage.overview.total")}` : ""}
         </div>
       </div>
       <div class="sessions-card-meta">
         <div class="sessions-card-stats">
-          <span>${isTokenMode ? formatTokens(avgValue) : formatCost(avgValue)} avg</span>
-          <span>${totalErrors} errors</span>
+          <span>${isTokenMode ? formatTokens(avgValue) : formatCost(avgValue)} ${t("usagePage.charts.avg")}</span>
+          <span>${totalErrors} ${t("usagePage.charts.errors")}</span>
         </div>
         <div class="chart-toggle small">
           <button
             class="toggle-btn ${sessionsTab === "all" ? "active" : ""}"
             @click=${() => onSessionsTabChange("all")}
           >
-            All
+            ${t("usagePage.charts.all")}
           </button>
           <button
             class="toggle-btn ${sessionsTab === "recent" ? "active" : ""}"
             @click=${() => onSessionsTabChange("recent")}
           >
-            Recently viewed
+            ${t("usagePage.charts.recentlyViewed")}
           </button>
         </div>
         <label class="sessions-sort">
-          <span>Sort</span>
+          <span>${t("usagePage.charts.sort")}</span>
           <select
             @change=${(e: Event) => onSessionSortChange((e.target as HTMLSelectElement).value as typeof sessionSort)}
           >
-            <option value="cost" ?selected=${sessionSort === "cost"}>Cost</option>
-            <option value="errors" ?selected=${sessionSort === "errors"}>Errors</option>
-            <option value="messages" ?selected=${sessionSort === "messages"}>Messages</option>
-            <option value="recent" ?selected=${sessionSort === "recent"}>Recent</option>
-            <option value="tokens" ?selected=${sessionSort === "tokens"}>Tokens</option>
+            <option value="cost" ?selected=${sessionSort === "cost"}>${t("usagePage.charts.cost")}</option>
+            <option value="errors" ?selected=${sessionSort === "errors"}>${t("usagePage.charts.errors")}</option>
+            <option value="messages" ?selected=${sessionSort === "messages"}>${t("usagePage.charts.messages")}</option>
+            <option value="recent" ?selected=${sessionSort === "recent"}>${t("usagePage.charts.recent")}</option>
+            <option value="tokens" ?selected=${sessionSort === "tokens"}>${t("usagePage.charts.tokens")}</option>
           </select>
         </label>
         <button
           class="btn btn-sm sessions-action-btn icon"
           @click=${() => onSessionSortDirChange(sessionSortDir === "desc" ? "asc" : "desc")}
-          title=${sessionSortDir === "desc" ? "Descending" : "Ascending"}
+          title=${sessionSortDir === "desc" ? t("usagePage.charts.descending") : t("usagePage.charts.ascending")}
         >
           ${sessionSortDir === "desc" ? "↓" : "↑"}
         </button>
@@ -739,7 +769,7 @@ function renderSessionsCard(
           selectedCount > 0
             ? html`
                 <button class="btn btn-sm sessions-action-btn sessions-clear-btn" @click=${onClearSessions}>
-                  Clear Selection
+                  ${t("usagePage.charts.clearSelection")}
                 </button>
               `
             : nothing
@@ -749,31 +779,31 @@ function renderSessionsCard(
         sessionsTab === "recent"
           ? recentEntries.length === 0
             ? html`
-                <div class="muted" style="padding: 20px; text-align: center">No recent sessions</div>
+                <div class="muted" style="padding: 20px; text-align: center">${t("usagePage.charts.noRecentSessions")}</div>
               `
             : html`
-	                <div class="session-bars" style="max-height: 220px; margin-top: 6px;">
-	                  ${recentEntries.map((s) => renderSessionBarRow(s, selectedSet.has(s.key)))}
-	                </div>
-	              `
+                <div class="session-bars" style="max-height: 220px; margin-top: 6px;">
+                  ${recentEntries.map((s) => renderSessionBarRow(s, selectedSet.has(s.key)))}
+                </div>
+              `
           : sessions.length === 0
             ? html`
-                <div class="muted" style="padding: 20px; text-align: center">No sessions in range</div>
+                <div class="muted" style="padding: 20px; text-align: center">${t("usagePage.charts.noSessionsInRange")}</div>
               `
             : html`
-	                <div class="session-bars">
-	                  ${sortedWithDir
-                      .slice(0, 50)
-                      .map((s) => renderSessionBarRow(s, selectedSet.has(s.key)))}
-	                  ${sessions.length > 50 ? html`<div class="muted" style="padding: 8px; text-align: center; font-size: 11px;">+${sessions.length - 50} more</div>` : nothing}
-	                </div>
-	              `
+                <div class="session-bars">
+                  ${sortedWithDir
+                    .slice(0, 50)
+                    .map((s) => renderSessionBarRow(s, selectedSet.has(s.key)))}
+                  ${sessions.length > 50 ? html`<div class="muted" style="padding: 8px; text-align: center; font-size: 11px;">+${sessions.length - 50} ${t("usagePage.details.more")}</div>` : nothing}
+                </div>
+              `
       }
       ${
         selectedCount > 1
           ? html`
               <div style="margin-top: 10px;">
-                <div class="sessions-card-count">Selected (${selectedCount})</div>
+                <div class="sessions-card-count">${t("usagePage.charts.selected").replace("{count}", `${selectedCount}`)}</div>
                 <div class="session-bars" style="max-height: 160px; margin-top: 6px;">
                   ${selectedEntries.map((s) => renderSessionBarRow(s, true))}
                 </div>

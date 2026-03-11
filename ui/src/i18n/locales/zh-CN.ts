@@ -1,4 +1,4 @@
-﻿import type { TranslationMap } from "../lib/types.ts";
+import type { TranslationMap } from "../lib/types.ts";
 
 export const zh_CN: TranslationMap = {
   common: {
@@ -995,6 +995,16 @@ export const zh_CN: TranslationMap = {
       selectAll: "全选",
       limitWarning: "显示前 1,000 个会话。缩小日期范围以获取完整结果。",
     },
+    chips: {
+      days: "日期",
+      hours: "小时",
+      session: "会话",
+      daysCount: "{count} 天",
+      hoursCount: "{count} 小时",
+      sessionsCount: "{count} 个会话",
+      removeFilter: "移除筛选",
+      clearAll: "清除全部",
+    },
     overview: {
       title: "使用概览",
       messages: "消息",
@@ -1029,6 +1039,7 @@ export const zh_CN: TranslationMap = {
       cached: "已缓存",
       prompt: "提示词",
       topModels: "热门模型",
+      unknown: "未知",
       noModelData: "无模型数据",
       topProviders: "热门提供商",
       noProviderData: "无提供商数据",
@@ -1087,6 +1098,7 @@ export const zh_CN: TranslationMap = {
       topTools: "热门工具",
       modelMix: "模型组合",
       close: "关闭会话详情",
+      filtered: "已筛选",
       usageOverTime: "随时间变化的使用情况",
       reset: "重置",
       perTurn: "每轮",
@@ -1115,6 +1127,12 @@ export const zh_CN: TranslationMap = {
       tool: "工具",
       toolResult: "工具结果",
       timelineFiltered: "时间轴已筛选",
+      of: "共",
+      ofInput: "占输入",
+      hasTools: "有工具调用",
+      searchConversation: "搜索对话",
+      you: "你",
+      noMessagesMatchFilters: "没有消息匹配当前筛选条件。",
     },
   },
 
