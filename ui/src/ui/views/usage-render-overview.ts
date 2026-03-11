@@ -397,13 +397,13 @@ function renderUsageInsights(
     stats.durationCount > 0
       ? (formatDurationCompact(stats.avgDurationMs, { spaced: true }) ?? "—")
       : "—";
-  const cacheHint = "Cache hit rate = cache read / (input + cache read). Higher is better.";
-  const errorHint = "Error rate = errors / total messages. Lower is better.";
-  const throughputHint = "Throughput shows tokens per minute over active time. Higher is better.";
-  const tokensHint = "Average tokens per message in this range.";
+  const cacheHint = ("usagePage.overview.cacheHitRateHint");
+  const errorHint = ("usagePage.overview.errorRateHint");
+  const throughputHint = ("usagePage.overview.throughputHint");
+  const tokensHint = ("usagePage.overview.avgTokensMsgHint");
   const costHint = showCostHint
-    ? "Average cost per message when providers report costs. Cost data is missing for some or all sessions in this range."
-    : "Average cost per message when providers report costs.";
+    ? ("usagePage.overview.avgCostMsgMissingHint")
+    : ("usagePage.overview.avgCostMsgHint");
 
   const errorDays = aggregates.daily
     .filter((day) => day.messages > 0 && day.errors > 0)
@@ -448,61 +448,61 @@ function renderUsageInsights(
 
   return html`
     <section class="card" style="margin-top: 16px;">
-      <div class="card-title">Usage Overview</div>
+      <div class="card-title">${("usagePage.overview.title")}</div>
       <div class="usage-summary-grid">
         <div class="usage-summary-card">
           <div class="usage-summary-title">
-            Messages
-            <span class="usage-summary-hint" title="Total user + assistant messages in range.">?</span>
+            ${("usagePage.overview.messages")}
+            <span class="usage-summary-hint" title="${("usagePage.overview.messagesHint")}">?</span>
           </div>
           <div class="usage-summary-value">${aggregates.messages.total}</div>
           <div class="usage-summary-sub">
-            ${aggregates.messages.user} user · ${aggregates.messages.assistant} assistant
+            ${aggregates.messages.user} ${("usagePage.overview.user")} · ${aggregates.messages.assistant} ${("usagePage.overview.assistant")}
           </div>
         </div>
         <div class="usage-summary-card">
           <div class="usage-summary-title">
-            Tool Calls
-            <span class="usage-summary-hint" title="Total tool call count across sessions.">?</span>
+            ${("usagePage.overview.toolCalls")}
+            <span class="usage-summary-hint" title="${("usagePage.overview.toolCallsHint")}">?</span>
           </div>
           <div class="usage-summary-value">${aggregates.tools.totalCalls}</div>
-          <div class="usage-summary-sub">${aggregates.tools.uniqueTools} tools used</div>
+          <div class="usage-summary-sub">${("usagePage.overview.toolsUsed").replace("{count}", `${aggregates.tools.uniqueTools}`)}</div>
         </div>
         <div class="usage-summary-card">
           <div class="usage-summary-title">
-            Errors
-            <span class="usage-summary-hint" title="Total message/tool errors in range.">?</span>
+            ${("usagePage.overview.errors")}
+            <span class="usage-summary-hint" title="${("usagePage.overview.errorsHint")}">?</span>
           </div>
           <div class="usage-summary-value">${aggregates.messages.errors}</div>
-          <div class="usage-summary-sub">${aggregates.messages.toolResults} tool results</div>
+          <div class="usage-summary-sub">${("usagePage.overview.toolResults").replace("{count}", `${aggregates.messages.toolResults}`)}</div>
         </div>
         <div class="usage-summary-card">
           <div class="usage-summary-title">
-            Avg Tokens / Msg
+            ${("usagePage.overview.avgTokensMsg")}
             <span class="usage-summary-hint" title=${tokensHint}>?</span>
           </div>
           <div class="usage-summary-value">${formatTokens(avgTokens)}</div>
-          <div class="usage-summary-sub">Across ${aggregates.messages.total || 0} messages</div>
+          <div class="usage-summary-sub">${("usagePage.overview.acrossMessages").replace("{count}", `${aggregates.messages.total || 0}`)}</div>
         </div>
         <div class="usage-summary-card">
           <div class="usage-summary-title">
-            Avg Cost / Msg
+            ${("usagePage.overview.avgCostMsg")}
             <span class="usage-summary-hint" title=${costHint}>?</span>
           </div>
           <div class="usage-summary-value">${formatCost(avgCost, 4)}</div>
-          <div class="usage-summary-sub">${formatCost(totals.totalCost)} total</div>
+          <div class="usage-summary-sub">${formatCost(totals.totalCost)} ${("usagePage.overview.total").toLowerCase()}</div>
         </div>
         <div class="usage-summary-card">
           <div class="usage-summary-title">
-            Sessions
-            <span class="usage-summary-hint" title="Distinct sessions in the range.">?</span>
+            ${("usagePage.overview.sessions")}
+            <span class="usage-summary-hint" title="${("usagePage.overview.sessionsHint")}">?</span>
           </div>
           <div class="usage-summary-value">${sessionCount}</div>
-          <div class="usage-summary-sub">of ${totalSessions} in range</div>
+          <div class="usage-summary-sub">${("usagePage.overview.ofTotalInRange").replace("{total}", `${totalSessions}`)}</div>
         </div>
         <div class="usage-summary-card">
           <div class="usage-summary-title">
-            Throughput
+            ${("usagePage.overview.throughput")}
             <span class="usage-summary-hint" title=${throughputHint}>?</span>
           </div>
           <div class="usage-summary-value">${throughputLabel}</div>
@@ -510,33 +510,33 @@ function renderUsageInsights(
         </div>
         <div class="usage-summary-card">
           <div class="usage-summary-title">
-            Error Rate
+            ${("usagePage.overview.errorRate")}
             <span class="usage-summary-hint" title=${errorHint}>?</span>
           </div>
           <div class="usage-summary-value ${errorRatePct > 5 ? "bad" : errorRatePct > 1 ? "warn" : "good"}">${errorRatePct.toFixed(2)}%</div>
           <div class="usage-summary-sub">
-            ${aggregates.messages.errors} errors · ${avgDurationLabel} avg session
+            ${aggregates.messages.errors} ${("usagePage.overview.errorsLc")} · ${("usagePage.overview.avgSession").replace("{value}", avgDurationLabel)}
           </div>
         </div>
         <div class="usage-summary-card">
           <div class="usage-summary-title">
-            Cache Hit Rate
+            ${("usagePage.overview.cacheHitRate")}
             <span class="usage-summary-hint" title=${cacheHint}>?</span>
           </div>
           <div class="usage-summary-value ${cacheHitRate > 0.6 ? "good" : cacheHitRate > 0.3 ? "warn" : "bad"}">${cacheHitLabel}</div>
           <div class="usage-summary-sub">
-            ${formatTokens(totals.cacheRead)} cached · ${formatTokens(cacheBase)} prompt
+            ${formatTokens(totals.cacheRead)} ${("usagePage.overview.cached")} · ${formatTokens(cacheBase)} ${("usagePage.overview.prompt")}
           </div>
         </div>
       </div>
       <div class="usage-insights-grid">
-        ${renderInsightList("Top Models", topModels, "No model data")}
-        ${renderInsightList("Top Providers", topProviders, "No provider data")}
-        ${renderInsightList("Top Tools", topTools, "No tool calls")}
-        ${renderInsightList("Top Agents", topAgents, "No agent data")}
-        ${renderInsightList("Top Channels", topChannels, "No channel data")}
-        ${renderPeakErrorList("Peak Error Days", errorDays, "No error data")}
-        ${renderPeakErrorList("Peak Error Hours", errorHours, "No error data")}
+        ${renderInsightList(("usagePage.overview.topModels"), topModels, ("usagePage.overview.noModelData"))}
+        ${renderInsightList(("usagePage.overview.topProviders"), topProviders, ("usagePage.overview.noProviderData"))}
+        ${renderInsightList(("usagePage.overview.topTools"), topTools, ("usagePage.overview.noToolCalls"))}
+        ${renderInsightList(("usagePage.overview.topAgents"), topAgents, ("usagePage.overview.noAgentData"))}
+        ${renderInsightList(("usagePage.overview.topChannels"), topChannels, ("usagePage.overview.noChannelData"))}
+        ${renderPeakErrorList(("usagePage.overview.peakErrorDays"), errorDays, ("usagePage.overview.noErrorData"))}
+        ${renderPeakErrorList(("usagePage.overview.peakErrorHours"), errorHours, ("usagePage.overview.noErrorData"))}
       </div>
     </section>
   `;

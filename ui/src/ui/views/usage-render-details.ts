@@ -1,4 +1,5 @@
 import { html, svg, nothing } from "lit";
+import { t } from "../../i18n/index.ts";
 import { formatDurationCompact } from "../../../../src/infra/format-time/format-duration.ts";
 import { parseToolSummary } from "../usage-helpers.ts";
 import { charsToTokens, formatCost, formatTokens } from "./usage-metrics.ts";
@@ -59,7 +60,7 @@ function renderSessionSummary(
   const usage = filteredUsage || session.usage;
   if (!usage) {
     return html`
-      <div class="muted">No usage data for this session.</div>
+      <div class="muted">${t("usagePage.details.noUsageData")}</div>
     `;
   }
 
@@ -97,7 +98,7 @@ function renderSessionSummary(
     toolItems = baseTools.map((tool) => ({
       label: tool.name,
       value: `${toolCounts.get(tool.name) ?? 0}`,
-      sub: "calls",
+      sub: t("usagePage.overview.calls").toLowerCase(),
     }));
     toolCallCount = [...toolCounts.values()].reduce((sum, c) => sum + c, 0);
     uniqueToolCount = toolCounts.size;
@@ -105,7 +106,7 @@ function renderSessionSummary(
     toolItems = baseTools.map((tool) => ({
       label: tool.name,
       value: `${tool.count}`,
-      sub: "calls",
+      sub: t("usagePage.overview.calls").toLowerCase(),
     }));
     toolCallCount = usage.toolUsage?.totalCalls ?? 0;
     uniqueToolCount = usage.toolUsage?.uniqueTools ?? 0;
@@ -121,29 +122,29 @@ function renderSessionSummary(
     ${badges.length > 0 ? html`<div class="usage-badges">${badges.map((b) => html`<span class="usage-badge">${b}</span>`)}</div>` : nothing}
     <div class="session-summary-grid">
       <div class="session-summary-card">
-        <div class="session-summary-title">Messages</div>
+        <div class="session-summary-title">${t("usagePage.details.messages")}</div>
         <div class="session-summary-value">${usage.messageCounts?.total ?? 0}</div>
-        <div class="session-summary-meta">${usage.messageCounts?.user ?? 0} user · ${usage.messageCounts?.assistant ?? 0} assistant</div>
+        <div class="session-summary-meta">${usage.messageCounts?.user ?? 0} ${t("usagePage.details.user")} · ${usage.messageCounts?.assistant ?? 0} ${t("usagePage.details.assistant")}</div>
       </div>
       <div class="session-summary-card">
-        <div class="session-summary-title">Tool Calls</div>
+        <div class="session-summary-title">${t("usagePage.details.toolCalls")}</div>
         <div class="session-summary-value">${toolCallCount}</div>
-        <div class="session-summary-meta">${uniqueToolCount} tools</div>
+        <div class="session-summary-meta">${uniqueToolCount} ${t("usagePage.details.tools")}</div>
       </div>
       <div class="session-summary-card">
-        <div class="session-summary-title">Errors</div>
+        <div class="session-summary-title">${t("usagePage.details.errors")}</div>
         <div class="session-summary-value">${usage.messageCounts?.errors ?? 0}</div>
-        <div class="session-summary-meta">${usage.messageCounts?.toolResults ?? 0} tool results</div>
+        <div class="session-summary-meta">${usage.messageCounts?.toolResults ?? 0} ${t("usagePage.details.toolResult")}</div>
       </div>
       <div class="session-summary-card">
-        <div class="session-summary-title">Duration</div>
+        <div class="session-summary-title">${t("usagePage.details.duration")}</div>
         <div class="session-summary-value">${formatDurationCompact(usage.durationMs, { spaced: true }) ?? "—"}</div>
         <div class="session-summary-meta">${formatTs(usage.firstActivity)} → ${formatTs(usage.lastActivity)}</div>
       </div>
     </div>
     <div class="usage-insights-grid" style="margin-top: 12px;">
-      ${renderInsightList("Top Tools", toolItems, "No tool calls")}
-      ${renderInsightList("Model Mix", modelItems, "No model data")}
+      ${renderInsightList(t("usagePage.details.topTools"), toolItems, t("usagePage.overview.noToolCalls"))}
+      ${renderInsightList(t("usagePage.details.modelMix"), modelItems, t("usagePage.overview.noModelData"))}
     </div>
   `;
 }
@@ -274,7 +275,7 @@ function renderSessionDetailPanel(
               : nothing
           }
         </div>
-        <button class="session-close-btn" @click=${onClose} title="Close session details">×</button>
+        <button class="session-close-btn" @click=${onClose} title="${t("usagePage.details.close")}">×</button>
       </div>
       <div class="session-detail-content">
         ${renderSessionSummary(
@@ -339,14 +340,14 @@ function renderTimeSeriesCompact(
   if (loading) {
     return html`
       <div class="session-timeseries-compact">
-        <div class="muted" style="padding: 20px; text-align: center">Loading...</div>
+        <div class="muted" style="padding: 20px; text-align: center">${t("usagePage.header.loading")}</div>
       </div>
     `;
   }
   if (!timeSeries || timeSeries.points.length < 2) {
     return html`
       <div class="session-timeseries-compact">
-        <div class="muted" style="padding: 20px; text-align: center">No timeline data</div>
+        <div class="muted" style="padding: 20px; text-align: center">${t("usagePage.details.noTimelineData")}</div>
       </div>
     `;
   }
@@ -371,7 +372,7 @@ function renderTimeSeriesCompact(
   if (points.length < 2) {
     return html`
       <div class="session-timeseries-compact">
-        <div class="muted" style="padding: 20px; text-align: center">No data in range</div>
+        <div class="muted" style="padding: 20px; text-align: center">${t("usagePage.details.noDataInRange")}</div>
       </div>
     `;
   }
@@ -452,13 +453,13 @@ function renderTimeSeriesCompact(
   return html`
     <div class="session-timeseries-compact">
       <div class="timeseries-header-row">
-        <div class="card-title" style="font-size: 12px; color: var(--text);">Usage Over Time</div>
+        <div class="card-title" style="font-size: 12px; color: var(--text);">${t("usagePage.details.usageOverTime")}</div>
         <div class="timeseries-controls">
           ${
             hasSelection
               ? html`
             <div class="chart-toggle small">
-              <button class="toggle-btn active" @click=${() => onCursorRangeChange?.(null, null)}>Reset</button>
+              <button class="toggle-btn active" @click=${() => onCursorRangeChange?.(null, null)}>${t("usagePage.details.reset")}</button>
             </div>
           `
               : nothing
@@ -468,13 +469,13 @@ function renderTimeSeriesCompact(
               class="toggle-btn ${!isCumulative ? "active" : ""}"
               @click=${() => onModeChange("per-turn")}
             >
-              Per Turn
+              ${t("usagePage.details.perTurn")}
             </button>
             <button
               class="toggle-btn ${isCumulative ? "active" : ""}"
               @click=${() => onModeChange("cumulative")}
             >
-              Cumulative
+              ${t("usagePage.details.cumulative")}
             </button>
           </div>
           ${
@@ -485,13 +486,13 @@ function renderTimeSeriesCompact(
                       class="toggle-btn ${breakdownMode === "total" ? "active" : ""}"
                       @click=${() => onBreakdownChange("total")}
                     >
-                      Total
+                      ${t("usagePage.details.total")}
                     </button>
                     <button
                       class="toggle-btn ${breakdownMode === "by-type" ? "active" : ""}"
                       @click=${() => onBreakdownChange("by-type")}
                     >
-                      By Type
+                      ${t("usagePage.details.byType")}
                     </button>
                   </div>
                 `
